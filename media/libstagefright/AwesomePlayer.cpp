@@ -1911,21 +1911,9 @@ status_t AwesomePlayer::initAudioDecoder() {
         }
     }
 
-    int64_t durationUs = -1;
-    mAudioTrack->getFormat()->findInt64(kKeyDuration, &durationUs);
-
-    if (!mOffloadAudio && mAudioSource != NULL) {
-        ALOGW("Could not offload audio decode, try pcm offload");
-        sp<MetaData> format = mAudioSource->getFormat();
-        if (durationUs >= 0) {
-            format->setInt64(kKeyDuration, durationUs);
-        }
-        mOffloadAudio = canOffloadStream(format, (mVideoSource != NULL), vMeta,
-                                     isStreamingHTTP(), streamType);
-    }
-
     if (mAudioSource != NULL) {
-        if (durationUs >= 0) {
+        int64_t durationUs;
+        if (mAudioTrack->getFormat()->findInt64(kKeyDuration, &durationUs)) {
             Mutex::Autolock autoLock(mMiscStateLock);
             if (mDurationUs < 0 || durationUs > mDurationUs) {
                 mDurationUs = durationUs;
